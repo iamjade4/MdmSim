@@ -10,6 +10,7 @@
 #include "G4Step.hh"
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
+#include "Analysis.hh"
 
 #include "TLorentzVector.h"
 #include "TVector3.h"
@@ -50,8 +51,9 @@ namespace
                        const std::string &name)
     {
         const auto it = params.find(name);
+        G4cout << name << G4endl;
         if (it == params.end())
-            throw std::runtime_error("Missing reaction parameter: " + name);
+           throw std::runtime_error("Missing reaction parameter: " + name);
         return static_cast<G4int>(std::lround(it->second));
     }
 
@@ -124,6 +126,7 @@ namespace MdmSim
             track->GetParentID() == 0;
         fWillReact = isBeamIon && G4UniformRand() < fReactionProbability;
         fReactionFraction = G4UniformRand();
+        // fReactionFraction = 1; //Just to get the average energy of the detected particles
     }
 
     void ReactionProcess::SetParams(std::map<std::string, G4double> params)
@@ -139,7 +142,21 @@ namespace MdmSim
         fHeavyProductZ = RoundedParam(params, "HeavyProductZ");
         fHeavyProductA = RoundedParam(params, "HeavyProductA");
         fHeavyProductCharge = RoundedParam(params, "HeavyProductCharge");
-        fHeavyProductEx = OptionalParam(params, "HeavyProductExMeV", 0.) * MeV;
+        fHeavyProductEx = RoundedParam(params, "HeavyProductExMeV") * MeV;
+
+        fDecayHeavyZ = RoundedParam(params, "DecayHeavyZ");
+        fDecayQ = RoundedParam(params, "DecayQ") * MeV;
+        fDecayHeavyA = RoundedParam(params, "DecayHeavyA");
+        fDecayHeavyCharge = RoundedParam(params, "DecayHeavyCharge");
+        fDecayLightOneZ = RoundedParam(params, "DecayLightOneZ");
+        fDecayLightOneA = RoundedParam(params, "DecayLightOneA");
+        fDecayLightOneCharge = RoundedParam(params, "DecayLightOneCharge");
+        fDecayLightTwoZ = RoundedParam(params, "DecayLightTwoZ");
+        fDecayLightTwoA = RoundedParam(params, "DecayLightTwoA");
+        fDecayLightTwoCharge = RoundedParam(params, "DecayLightTwoCharge");
+
+
+
         fReactionProbability = OptionalParam(params, "ReactionProbability", 1.);
 
         if (fBeamZ <= 0 || fBeamA <= 0 || fTargetZ < 0 || fTargetA <= 0 ||
@@ -196,6 +213,8 @@ namespace MdmSim
 
     void ReactionProcess::TwoBody(const G4Track &aTrack, const G4ThreeVector &reactionPosition)
     {
+        Analysis *analysis = Analysis::Instance();
+
         const G4double targetMass =
             GetReactionParticleDefinition(fTargetZ, fTargetA)->GetPDGMass();
         G4ParticleDefinition *lightDefinition =
@@ -239,6 +258,29 @@ namespace MdmSim
         const TVector3 betaCm = cm.BoostVector();
         light4.Boost(betaCm);
         heavy4.Boost(betaCm);
+        double ProtonPX = light4.Px();
+        double ProtonPY = light4.Py();
+        double ProtonPZ = light4.Pz();
+        double ProtonE = (ProtonPX*ProtonPX + ProtonPY*ProtonPY + ProtonPZ*ProtonPZ)/(2*lightMass);
+        double aux = atan(sqrt(ProtonPX*ProtonPX + ProtonPY*ProtonPY)/ProtonPZ) *180/CLHEP::pi;
+        if(aux<0){
+            double ProtonPhi = 180 + aux;
+            // G4cout << ProtonPhi << G4endl;
+            analysis->SetProtonPhi(ProtonPhi);
+        } else{
+            double ProtonPhi = aux;
+            analysis->SetProtonPhi(ProtonPhi);
+        }
+        double ProtonTheta = acos(ProtonPX/ProtonPY) *180/CLHEP::pi;
+
+
+        analysis->SetProtonPX(ProtonPX);
+        analysis->SetProtonPY(ProtonPY);
+        analysis->SetProtonPZ(ProtonPZ);
+        analysis->SetProtonE(ProtonE);
+
+        analysis->SetProtonTheta(ProtonTheta);
+
 
         auto *light = new G4DynamicParticle(lightDefinition,
                                             G4ThreeVector(light4.Px(), light4.Py(), light4.Pz()));
@@ -246,12 +288,69 @@ namespace MdmSim
         auto *heavy = new G4DynamicParticle(heavyDefinition,
                                             G4ThreeVector(heavy4.Px(), heavy4.Py(), heavy4.Pz()));
         heavy->SetCharge(fHeavyProductCharge * eplus);
-
+        
         auto *lightTrack = new G4Track(light, aTrack.GetGlobalTime(), reactionPosition);
         auto *heavyTrack = new G4Track(heavy, aTrack.GetGlobalTime(), reactionPosition);
 
-        aParticleChange.SetNumberOfSecondaries(2);
+
+        aParticleChange.SetNumberOfSecondaries(3);
         aParticleChange.AddSecondary(lightTrack);
-        aParticleChange.AddSecondary(heavyTrack);
+        //aParticleChange.AddSecondary(heavyTrack);
+        // if(aux<0){
+        ThreeBodyDecay(*heavyTrack, reactionPosition);
+        // }
+    }
+
+    void ReactionProcess::ThreeBodyDecay(const G4Track &aTrack, const G4ThreeVector &reactionPosition){
+        
+
+        G4ParticleDefinition *decayDefinition =
+            GetReactionParticleDefinition(fDecayHeavyZ, fDecayHeavyA, 0);
+        G4ParticleDefinition *lightOneDefinition =
+            GetReactionParticleDefinition(fDecayLightOneZ, fDecayLightOneA, 0);
+        G4ParticleDefinition *lightTwoDefinition =
+            GetReactionParticleDefinition(fDecayLightTwoZ, fDecayLightTwoZ, 0);
+
+        const G4double decayMass = decayDefinition->GetPDGMass();
+        const G4double lightOneMass = lightOneDefinition->GetPDGMass();
+        const G4double lightTwoMass = lightTwoDefinition->GetPDGMass();
+        const G4LorentzVector projectile4 = aTrack.GetDynamicParticle()->Get4Momentum();
+        TLorentzVector projectile(projectile4.px(), projectile4.py(), projectile4.pz(),
+                                  projectile4.e());
+        // G4cout << (projectile4.px()*projectile4.px() + projectile4.py()*projectile4.py() + projectile4.pz()*projectile4.pz())/(2*87479.78) << G4endl;
+        TLorentzVector CM = projectile;
+        // This energy is correct
+        // No target so I don't need to calculate the s
+
+        const G4double s = CM.M2();
+        const G4double sqrtS = std::sqrt(s);
+        const G4double EkCM = fHeavyProductEx + fDecayQ;
+
+        // This only works for two of the same decay particles ie 2n
+
+        const G4double EMax = 4*EkCM*(lightOneMass/decayMass)/(1+4*lightOneMass/decayMass);
+        const G4double ekDecayCM = EMax * G4UniformRand();
+        // For single neutron emission channel VVV
+
+        // const G4double ekDecayCM = EkCM*lightOneMass/(lightOneMass + decayMass);
+
+        const G4double decayPCM = sqrt(2*ekDecayCM*decayMass); //Only care about tracking the heavy here
+        const G4double eDecayCM = sqrt(decayPCM*decayPCM  + decayMass*decayMass);
+        TVector3 decayMomentumCM(decayPCM, 0., 0.);
+        decayMomentumCM.SetTheta(std::acos(-1. + 2. * G4UniformRand()));
+        decayMomentumCM.SetPhi(G4UniformRand() * 2. * CLHEP::pi);
+        TLorentzVector decay4(decayMomentumCM, eDecayCM);
+        const TVector3 betaCm = CM.BoostVector();
+        // G4cout << decay4.Pz() << G4endl;
+        decay4.Boost(betaCm); //not boosting properly???
+        auto *decay = new G4DynamicParticle(decayDefinition,
+                                            G4ThreeVector(decay4.Px(), decay4.Py(), decay4.Pz()));
+        // G4cout << decay4.Pz() << G4endl;
+        decay->SetCharge(fDecayHeavyCharge * eplus);
+        auto *decayTrack = new G4Track(decay, aTrack.GetGlobalTime(), reactionPosition);
+        //Okay so decay is a particle actually being made, but for some reason it won't get added?
+        aParticleChange.AddSecondary(decayTrack);
+        // G4cout << projectile4 << G4endl;
+        //Maybe??
     }
 }

@@ -3,6 +3,7 @@
 #include "RunAction.hh"
 #include "EventAction.hh"
 #include "SteppingAction.hh"
+#include "TH2D.h"
 
 namespace MdmSim
 {
@@ -43,7 +44,9 @@ namespace MdmSim
         SetUserAction(runAction);
 
         EventAction *eventAction = new EventAction(runAction);
+        
         eventAction->ParseParams(std::get<std::map<std::string, G4double>>(fParameters.find("EventParameters")->second));
+
         SetUserAction(eventAction);
 
         SetUserAction(new SteppingAction(eventAction));

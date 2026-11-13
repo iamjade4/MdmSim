@@ -444,6 +444,8 @@ namespace MdmSim
                               fReactionLightEx, fReactionLightCharge);
             addChargeOverride(fReactionHeavyZ, fReactionHeavyA,
                               fReactionHeavyEx, fReactionHeavyCharge);
+            addChargeOverride(fDecayHeavyZ, fDecayHeavyA,
+                              0, fDecayHeavyCharge);
         }
 
         // First multipole
@@ -572,6 +574,46 @@ namespace MdmSim
             else if (it.first == "ReactionHeavyExMeV")
             {
                 fReactionHeavyEx = it.second * MeV;
+            }
+            else if (it.first == "DecayQ")
+            {
+                fDecayQ = it.second * MeV;
+            }
+            else if (it.first == "DecayHeavyZ")
+            {
+                fDecayHeavyZ = static_cast<G4int>(std::lround(it.second));
+            }
+            else if (it.first == "DecayHeavyA")
+            {
+                fDecayHeavyA = static_cast<G4int>(std::lround(it.second));
+            }
+            else if (it.first == "DecayHeavyCharge")
+            {
+                fDecayHeavyCharge = it.second;
+            }
+            else if (it.first == "DecayLightOneZ")
+            {
+                fDecayLightOneZ = static_cast<G4int>(std::lround(it.second));
+            }
+            else if (it.first == "DecayLightOneA")
+            {
+                fDecayLightOneA = static_cast<G4int>(std::lround(it.second));
+            }
+            else if (it.first == "DecayLightOneCharge")
+            {
+                fDecayLightOneCharge = it.second;
+            }
+            else if (it.first == "DecayLightTwoZ")
+            {
+                fDecayLightTwoZ = static_cast<G4int>(std::lround(it.second));
+            }
+            else if (it.first == "DecayLightTwoA")
+            {
+                fDecayLightTwoA = static_cast<G4int>(std::lround(it.second));
+            }
+            else if (it.first == "DecayLightTwoCharge")
+            {
+                fDecayLightTwoCharge = it.second;
             }
             else if (it.first == "FirstMultipoleProbe")
             {

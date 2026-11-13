@@ -24,6 +24,7 @@ namespace MdmSim
 
     private:
         void TwoBody(const G4Track &aTrack, const G4ThreeVector &reactionPosition);
+        void ThreeBodyDecay(const G4Track &aTrack, const G4ThreeVector &reactionPosition);
         G4double TargetPathLength(const G4Track &aTrack) const;
         G4double TargetDepthAlongTrack(const G4Track &aTrack) const;
 
@@ -41,7 +42,22 @@ namespace MdmSim
         G4double fHeavyProductEx = 0.;
         G4double fReactionFraction = 0.;
         G4double fReactionProbability = 1.;
+
+        G4double fDecayQ = 0.;
+
+        G4int fDecayHeavyZ = 0;
+        G4int fDecayHeavyA = 0;
+        G4int fDecayHeavyCharge = 0;
+
+        G4int fDecayLightOneZ = 0;
+        G4int fDecayLightOneA = 0;
+        G4int fDecayLightOneCharge = 0;
+
+        G4int fDecayLightTwoZ = 0;
+        G4int fDecayLightTwoA = 0;
+        G4int fDecayLightTwoCharge = 0;
         G4bool fWillReact = true;
+
     };
 }
 #endif

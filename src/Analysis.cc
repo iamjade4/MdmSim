@@ -5,6 +5,10 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TVector3.h>
+#include <TH2D.h>
+#include <TCanvas.h>
+
+void SetLeafAddress(TTree* ntuple, const char* name, void* address);
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 namespace MdmSim
 {
@@ -55,7 +59,6 @@ namespace MdmSim
             // Define two trees, one for accurate hit info, the other one for what you will get in experiment.
             fTreeAccurate = new TTree("AccurateData", "Accurate data recorded");
             fTreeExperiment = new TTree("ExperimentalData", "Experimental data recorded by DAQ");
-
             // Add branches to trees
             fTreeAccurate->Branch("SlitHitPresent", &fSlitHitPresent);
             fTreeAccurate->Branch("SlitHitTransmitted", &fSlitHitTransmitted);
@@ -113,7 +116,7 @@ namespace MdmSim
             fTreeAccurate->Branch("Ppac1HitGlobalPosX", &fPpac1HitGlobalPosX);
             fTreeAccurate->Branch("Ppac1HitGlobalPosY", &fPpac1HitGlobalPosY);
             fTreeAccurate->Branch("Ppac1HitGlobalPosZ", &fPpac1HitGlobalPosZ);
-            fTreeAccurate->Branch("Ppac1HitLocalPosX", &fPpac1HitLocalPosX);
+            fTreeAccurate->Branch("PosX", &fPpac1HitLocalPosX);
             fTreeAccurate->Branch("Ppac1HitLocalPosY", &fPpac1HitLocalPosY);
             fTreeAccurate->Branch("Ppac1HitLocalPosZ", &fPpac1HitLocalPosZ);
             fTreeAccurate->Branch("Ppac1HitGlobalMomentumX", &fPpac1HitGlobalMomentumX);
@@ -122,6 +125,14 @@ namespace MdmSim
             fTreeAccurate->Branch("Ppac1HitLocalMomentumX", &fPpac1HitLocalMomentumX);
             fTreeAccurate->Branch("Ppac1HitLocalMomentumY", &fPpac1HitLocalMomentumY);
             fTreeAccurate->Branch("Ppac1HitLocalMomentumZ", &fPpac1HitLocalMomentumZ);
+            // G4cout << "### 1 " << G4endl;
+
+            // TH2D *histogram = new TH2D("histogram", "histogram", 300, -150, 150, 20, -10, 10);
+
+            // histogram->Fill(double(fPpac1HitLocalPosX[0]), double(fPpac1HitLocalPosY[0]));
+            // G4cout << "### " << histogram << G4endl;
+            // fTreeAccurate->Branch("hist", "TH2D", histogram, 128000, 0);
+            //G4cout << "### 2 " << G4endl;
 
             fTreeAccurate->Branch("Ppac2Accepted", &fPpac2Accepted);
             fTreeAccurate->Branch("Ppac2HitTrackId", &fPpac2HitTrackId);
@@ -140,6 +151,13 @@ namespace MdmSim
             fTreeAccurate->Branch("Ppac2HitLocalMomentumY", &fPpac2HitLocalMomentumY);
             fTreeAccurate->Branch("Ppac2HitLocalMomentumZ", &fPpac2HitLocalMomentumZ);
 
+            fTreeAccurate->Branch("ProtonPX", &fProtonPX);
+            fTreeAccurate->Branch("ProtonPY", &fProtonPY);
+            fTreeAccurate->Branch("ProtonPZ", &fProtonPZ);
+            fTreeAccurate->Branch("ProtonE", &fProtonE);
+            fTreeAccurate->Branch("ProtonTheta", &fProtonTheta);
+            fTreeAccurate->Branch("ProtonPhi", &fProtonPhi);
+
             fTreeExperiment->Branch("DaqTrigger", &fDaqTrigger, "DaqTrigger/O");
             fTreeExperiment->Branch("SiDeltaEHitEDep", &fSiDeltaEHitEDepExp);
             fTreeExperiment->Branch("SiDeltaEHitTime", &fSiDeltaEHitTimeExp);
@@ -147,6 +165,11 @@ namespace MdmSim
             fTreeExperiment->Branch("SiEHitTime", &fSiEHitTimeExp);
             fTreeExperiment->Branch("SiEHitHorizontalNo", &fSiEHitHorizontalNo);
             fTreeExperiment->Branch("SiEHitVerticalNo", &fSiEHitVerticalNo);
+            
+            std::vector<double> PosX;
+            std::vector<double> PosY;         
+            PosX = fPpac1HitLocalPosX;
+            PosY = fPpac1HitLocalPosY;
 
             fFactoryOn = true;
         }
@@ -163,20 +186,44 @@ namespace MdmSim
         if (!fFactoryOn)
             return;
         fFile->cd();
+
+        
+        // TH1D *histogram = new TH1D("histogram", "histogram", 120, -120, 0);
+
+        // // fTreeAccurate->SetBranchAddress("PosX", &PosX);
+        // // fTreeAccurate->SetBranchAddress("Ppac1HitLocalPosY", &PosY);
+        // int entries = fTreeAccurate->GetEntries();
+        // for (int i = 0; i < entries; i++){
+        //     fTreeAccurate->GetEntry(i);
+        //     G4cout << " PoSX = " << PosX[i] << G4endl;
+        //     G4cout << " Ppac1HitLocalX = " << fPpac1HitLocalPosX[i] << G4endl;
+        //     histogram->Fill(PosX[i]); //Not these, find the position
+
+        //     //histogram->Fill(i/100, (10000-i)/100); //Testing to see if it does actually work (Kinda?)
+        // }
         fTreeAccurate->Write();
         fTreeExperiment->Write();
+
+        // TCanvas *C1 = new TCanvas ("C1","Positions", 1600, 1200);
+        // histogram->Draw();
+        // C1->Print("PLEASE.pdf"); //OKAY so this works????
+
         fFile->Close();
         fFactoryOn = false;
 
         G4cout << "\n----> TTrees are saved.\n"
                << G4endl;
+
     }
+
+
 
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
     void Analysis::FillTreeAccurate()
     {
         fTreeAccurate->Fill();
+        
     }
 
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

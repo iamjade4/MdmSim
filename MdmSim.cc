@@ -93,7 +93,7 @@ namespace
             }
         }
 
-        const std::array<const char *, 12> integerKeys{{
+        const std::array<const char *, 23> integerKeys{{
             "ProcessNumber",
             "BeamZ",
             "BeamA",
@@ -106,6 +106,18 @@ namespace
             "ReactionHeavyZ",
             "ReactionHeavyA",
             "ReactionHeavyCharge",
+            "ReactionHeavyExMeV",
+            "DecayQ",
+            "DecayHeavyZ",
+            "DecayHeavyA",
+            "DecayHeavyCharge",
+            "DecayLightOneZ",
+            "DecayLightOneA",
+            "DecayLightOneCharge",
+            "DecayLightTwoZ",
+            "DecayLightTwoA",
+            "DecayLightTwoCharge",
+
         }};
         for (const char *key : integerKeys)
         {
@@ -141,6 +153,17 @@ namespace
         const G4int heavyZ = config.at("ReactionHeavyZ").get<G4int>();
         const G4int heavyA = config.at("ReactionHeavyA").get<G4int>();
         const G4int heavyCharge = config.at("ReactionHeavyCharge").get<G4int>();
+        const G4int DecayQ = config.at("DecayQ").get<G4int>();
+        const G4int DecayHeavyZ = config.at("DecayHeavyZ").get<G4int>();
+        const G4int DecayHeavyA = config.at("DecayHeavyA").get<G4int>();
+        const G4int DecayHeavyCharge = config.at("DecayHeavyCharge").get<G4int>();
+        const G4int DecayLightOneZ = config.at("DecayLightOneZ").get<G4int>();
+        const G4int DecayLightOneA = config.at("DecayLightOneA").get<G4int>();
+        const G4int DecayLightOneCharge = config.at("DecayLightOneCharge").get<G4int>();
+        const G4int DecayLightTwoZ = config.at("DecayLightTwoZ").get<G4int>();
+        const G4int DecayLightTwoA = config.at("DecayLightTwoA").get<G4int>();
+        const G4int DecayLightTwoCharge = config.at("DecayLightTwoCharge").get<G4int>();
+
         ValidateNuclide(targetZ, targetA, "Reaction target");
         ValidateNuclide(lightZ, lightA, "Reaction light product");
         ValidateNuclide(heavyZ, heavyA, "Reaction heavy product");
@@ -253,6 +276,16 @@ int main(int argc, char **argv)
             reactionParameters["HeavyProductA"] = config.at("ReactionHeavyA").get<G4double>();
             reactionParameters["HeavyProductCharge"] = config.at("ReactionHeavyCharge").get<G4double>();
             reactionParameters["HeavyProductExMeV"] = config.at("ReactionHeavyExMeV").get<G4double>();
+            reactionParameters["DecayQ"] = config.at("DecayQ").get<G4double>();
+            reactionParameters["DecayHeavyZ"] = config.at("DecayHeavyZ").get<G4double>();
+            reactionParameters["DecayHeavyA"] = config.at("DecayHeavyA").get<G4double>();
+            reactionParameters["DecayHeavyCharge"] = config.at("DecayHeavyCharge").get<G4double>();
+            reactionParameters["DecayLightOneZ"] = config.at("DecayLightOneZ").get<G4double>();
+            reactionParameters["DecayLightOneA"] = config.at("DecayLightOneZ").get<G4double>();
+            reactionParameters["DecayLightOneCharge"] = config.at("DecayLightOneZ").get<G4double>();
+            reactionParameters["DecayLightTwoZ"] = config.at("DecayLightTwoZ").get<G4double>();
+            reactionParameters["DecayLightTwoA"] = config.at("DecayLightTwoA").get<G4double>();
+            reactionParameters["DecayLightTwoCharge"] = config.at("DecayLightTwoCharge").get<G4double>();
 
             detectorParameters["ReactionLightZ"] = reactionParameters["LightProductZ"];
             detectorParameters["ReactionLightA"] = reactionParameters["LightProductA"];
@@ -261,7 +294,17 @@ int main(int argc, char **argv)
             detectorParameters["ReactionHeavyZ"] = reactionParameters["HeavyProductZ"];
             detectorParameters["ReactionHeavyA"] = reactionParameters["HeavyProductA"];
             detectorParameters["ReactionHeavyCharge"] = reactionParameters["HeavyProductCharge"];
-            detectorParameters["ReactionHeavyExMeV"] = reactionParameters["HeavyProductExMeV"];
+            detectorParameters["ReactionHeavyExMeV"] = reactionParameters["ReactionHeavyExMeV"];
+            detectorParameters["DecayQ"] = config.at("DecayQ").get<G4double>();
+            detectorParameters["DecayHeavyZ"] = config.at("DecayHeavyZ").get<G4double>();
+            detectorParameters["DecayHeavyA"] = config.at("DecayHeavyA").get<G4double>();
+            detectorParameters["DecayHeavyCharge"] = config.at("DecayHeavyCharge").get<G4double>();
+            detectorParameters["DecayLightOneZ"] = config.at("DecayLightOneZ").get<G4double>();
+            detectorParameters["DecayLightOneA"] = config.at("DecayLightOneZ").get<G4double>();
+            detectorParameters["DecayLightOneCharge"] = config.at("DecayLightOneZ").get<G4double>();
+            detectorParameters["DecayLightTwoZ"] = config.at("DecayLightTwoZ").get<G4double>();
+            detectorParameters["DecayLightTwoA"] = config.at("DecayLightTwoA").get<G4double>();
+            detectorParameters["DecayLightTwoCharge"] = config.at("DecayLightTwoCharge").get<G4double>();
         }
 
         std::map<std::string, std::variant<G4int, std::map<std::string, G4double>>> actionInitParameters; // parameters for ActionInitialization

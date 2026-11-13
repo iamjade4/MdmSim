@@ -13,6 +13,7 @@
 #include "Randomize.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
+#include "TH2D.h"
 
 #include <cmath>
 
@@ -548,7 +549,7 @@ namespace MdmSim
 
         //
         // PPAC 1
-        PpacHitsCollection *hcPpac1 = (PpacHitsCollection *)hce->GetHC(fHCID_Ppac1);
+        PpacHitsCollection *hcPpac1 = (PpacHitsCollection *)hce->GetHC(fHCID_Ppac1); //For some reason, all of these vector doubles are actually just vectors of size one. I guess because this is an event that resets them all to size 0 at the end
         G4int nofHitsPpac1 = hcPpac1->GetSize();
         G4bool ppac1HitAccepted;
         std::vector<G4int> ppac1HitTrackId;
@@ -566,6 +567,10 @@ namespace MdmSim
         std::vector<G4double> ppac1HitLocalMomentumX;
         std::vector<G4double> ppac1HitLocalMomentumY;
         std::vector<G4double> ppac1HitLocalMomentumZ;
+ 
+
+
+
         if (nofHitsPpac1 == 0)
         {
             // G4ExceptionDescription msg;
@@ -588,6 +593,8 @@ namespace MdmSim
             ppac1HitLocalMomentumX.push_back(-999.);
             ppac1HitLocalMomentumY.push_back(-999.);
             ppac1HitLocalMomentumZ.push_back(-999.);
+            // fhistogram->Fill(-999, -999);
+
         }
         else
         {
@@ -600,6 +607,8 @@ namespace MdmSim
             G4ThreeVector ppac1GlobalMomentum(0., 0., 0.);
             G4ThreeVector ppac1LocalMomentum(0., 0., 0.);
             G4int itTimes = 0;
+
+
             for (int i = 0; i < nofHitsPpac1; i++)
             {
                 if ((*hcPpac1)[i]->GetTrackID() == ppac1HitTrackId.back())
@@ -636,6 +645,9 @@ namespace MdmSim
                     ppac1GlobalMomentum = (*hcPpac1)[i]->GetGlobalMomentum();
                     ppac1LocalMomentum = (*hcPpac1)[i]->GetLocalMomentum();
                     itTimes = 1;
+                    // fhistogram->Fill(double(ppac1HitLocalPosX[0]) / (double)itTimes, double(ppac1HitLocalPosY[0]) / (double)itTimes);
+
+            
                 }
             }
             ppac1HitEDep.push_back(ppac1eDep);
@@ -652,11 +664,14 @@ namespace MdmSim
             ppac1HitLocalMomentumX.push_back(ppac1LocalMomentum.x() / (double)itTimes);
             ppac1HitLocalMomentumY.push_back(ppac1LocalMomentum.y() / (double)itTimes);
             ppac1HitLocalMomentumZ.push_back(ppac1LocalMomentum.z() / (double)itTimes);
+            // fhistogram->Fill(double(ppac1HitLocalPosX[0]) / (double)itTimes, double(ppac1HitLocalPosY[0]) / (double)itTimes);
             // G4cout << "ppac1HitGlobalPosX=" << G4BestUnit(ppac1HitGlobalPosX[0], "Length") << G4endl;
             // G4cout << "ppac1HitGlobalPosY=" << G4BestUnit(ppac1HitGlobalPosY[0], "Length") << G4endl;
             // G4cout << "ppac1HitGlobalPosZ=" << G4BestUnit(ppac1HitGlobalPosZ[0], "Length") << G4endl;
-            // G4cout << "ppac1HitLocalPosX=" << ppac1HitLocalPosX[0] << G4endl;
+            // G4cout << "PosX=" <<Ppac1HitLocalPosX[0] << G4endl;
             // G4cout << "ppac1HitLocalPosY=" << ppac1HitLocalPosY[0] << G4endl;
+
+            // G4cout << "PpacLocalX = " << ppac1LocalPos.x() / (double)itTimes << G4endl;
         }
         analysis->SetPpac1Accepted(ppac1HitAccepted);
         analysis->SetPpac1HitTrackId(ppac1HitTrackId);
@@ -674,6 +689,8 @@ namespace MdmSim
         analysis->SetPpac1HitLocalMomentumX(ppac1HitLocalMomentumX);
         analysis->SetPpac1HitLocalMomentumY(ppac1HitLocalMomentumY);
         analysis->SetPpac1HitLocalMomentumZ(ppac1HitLocalMomentumZ);
+
+        // analysis->SetHistogram(fhistogram);
 
         //
         // PPAC 2
@@ -781,6 +798,7 @@ namespace MdmSim
             ppac2HitLocalMomentumX.push_back(ppac2LocalMomentum.x() / (double)itTimes);
             ppac2HitLocalMomentumY.push_back(ppac2LocalMomentum.y() / (double)itTimes);
             ppac2HitLocalMomentumZ.push_back(ppac2LocalMomentum.z() / (double)itTimes);
+            
             // G4cout << "ppac2HitGlobalPosX=" << G4BestUnit(ppac2HitGlobalPosX[0], "Length") << G4endl;
             // G4cout << "ppac2HitGlobalPosY=" << G4BestUnit(ppac2HitGlobalPosY[0], "Length") << G4endl;
             // G4cout << "ppac2HitGlobalPosZ=" << G4BestUnit(ppac2HitGlobalPosZ[0], "Length") << G4endl;

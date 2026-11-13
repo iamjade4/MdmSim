@@ -19,6 +19,8 @@ namespace MdmSim
         EventAction(RunAction *runAction);
         ~EventAction() override;
 
+        void Sethistogram(TH2D *h) { fhistogram = h; };
+
         void BeginOfEventAction(const G4Event *event) override;
         void EndOfEventAction(const G4Event *event) override;
 
@@ -39,6 +41,7 @@ namespace MdmSim
         G4double fDipoleProbe = 0.;
         G4int fBeamCharge = 0;
         MdmTrace fMdmTrace;
+        TH2D *fhistogram;
     };
 
 }

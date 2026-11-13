@@ -58,6 +58,20 @@ namespace MdmSim
         G4int fReactionHeavyA = 0;
         G4double fReactionHeavyCharge = 0.;
         G4double fReactionHeavyEx = 0.;
+        G4double fDecayQ = 0.;
+
+        G4int fDecayHeavyZ = 0;
+        G4int fDecayHeavyA = 0;
+        G4int fDecayHeavyCharge = 0;
+
+        G4int fDecayLightOneZ = 0;
+        G4int fDecayLightOneA = 0;
+        G4int fDecayLightOneCharge = 0;
+
+        G4int fDecayLightTwoZ = 0;
+        G4int fDecayLightTwoA = 0;
+        G4int fDecayLightTwoCharge = 0;
+        G4bool fWillReact = true;
 
         G4double fFirstMultipoleProbe;
         G4double fDipoleProbe;

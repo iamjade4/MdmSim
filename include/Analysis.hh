@@ -19,7 +19,6 @@ namespace MdmSim
 
         void Book(std::string processNumber);
         void Save();
-
         void FillTreeAccurate();
         void FillTreeExperiment();
 
@@ -88,6 +87,7 @@ namespace MdmSim
         void SetPpac1HitTrackId(std::vector<G4int> &v) { fPpac1HitTrackId = v; };
         void SetPpac1HitEDep(std::vector<G4double> &v) { fPpac1HitEDep = v; };
         void SetPpac1HitTime(std::vector<G4double> &v) { fPpac1HitTime = v; };
+        void SetHistogram(TH2D *h) { fHistogram = h; };
 
         void SetPpac2Accepted(G4bool acc) { fPpac2Accepted = acc; };
         void SetPpac2HitGlobalPosX(std::vector<G4double> &v) { fPpac2HitGlobalPosX = v; };
@@ -113,6 +113,15 @@ namespace MdmSim
         void SetSiEHitVerticalNo(std::vector<G4int> &v) { fSiEHitVerticalNo = v; };
         void SetSiEHitEDepExp(std::vector<G4double> &v) { fSiEHitEDepExp = v; };
         void SetSiEHitTimeExp(std::vector<G4double> &v) { fSiEHitTimeExp = v; };
+
+        void SetProtonPX(double d) { fProtonPX = d; };
+        void SetProtonPY(double d) { fProtonPY = d; };
+        void SetProtonPZ(double d) { fProtonPZ = d; };
+        void SetProtonE(double d) { fProtonE = d; };
+        void SetProtonTheta(double d) { fProtonTheta = d; };
+        void SetProtonPhi(double d) { fProtonPhi = d; };
+
+
 
     private:
         static Analysis *fInstance;
@@ -195,6 +204,7 @@ namespace MdmSim
         std::vector<G4int> fPpac1HitTrackId;
         std::vector<G4double> fPpac1HitEDep;
         std::vector<G4double> fPpac1HitTime;
+        TH2D *fHistogram;
 
         G4bool fPpac2Accepted;
         std::vector<G4double> fPpac2HitGlobalPosX;
@@ -220,6 +230,13 @@ namespace MdmSim
         std::vector<G4int> fSiEHitVerticalNo;
         std::vector<G4double> fSiEHitEDepExp;
         std::vector<G4double> fSiEHitTimeExp;
+
+        double fProtonPX;
+        double fProtonPY;
+        double fProtonPZ;
+        double fProtonE;
+        double fProtonTheta;
+        double fProtonPhi;
     };
 
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

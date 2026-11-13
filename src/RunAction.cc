@@ -1,7 +1,9 @@
 #include "RunAction.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "DetectorConstruction.hh"
+#include "globals.hh"
 #include "Analysis.hh"
+#include "EventAction.hh"
 
 #include "G4RunManager.hh"
 #include "G4Run.hh"
@@ -19,6 +21,7 @@ namespace MdmSim
     RunAction::RunAction()
     {
         Analysis::Instance();
+
     }
 
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -42,6 +45,8 @@ namespace MdmSim
     {
         Analysis::Instance()->Save();
     }
+
+    
 
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
