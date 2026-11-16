@@ -219,8 +219,9 @@ namespace MdmSim
             GetReactionParticleDefinition(fTargetZ, fTargetA)->GetPDGMass();
         G4ParticleDefinition *lightDefinition =
             GetReactionParticleDefinition(fLightProductZ, fLightProductA, fLightProductEx);
+        const G4double excitationRandom = G4UniformRand()*(fHeavyProductEx);
         G4ParticleDefinition *heavyDefinition =
-            GetReactionParticleDefinition(fHeavyProductZ, fHeavyProductA, fHeavyProductEx);
+            GetReactionParticleDefinition(fHeavyProductZ, fHeavyProductA, excitationRandom);
         if (!lightDefinition || !heavyDefinition)
             throw std::runtime_error("Unable to create reaction product particle definitions");
 
@@ -273,12 +274,11 @@ namespace MdmSim
         }
         double ProtonTheta = acos(ProtonPX/ProtonPY) *180/CLHEP::pi;
 
-
+        analysis->SetExcitation(excitationRandom);
         analysis->SetProtonPX(ProtonPX);
         analysis->SetProtonPY(ProtonPY);
         analysis->SetProtonPZ(ProtonPZ);
         analysis->SetProtonE(ProtonE);
-
         analysis->SetProtonTheta(ProtonTheta);
 
 
@@ -296,12 +296,21 @@ namespace MdmSim
         aParticleChange.SetNumberOfSecondaries(3);
         aParticleChange.AddSecondary(lightTrack);
         //aParticleChange.AddSecondary(heavyTrack);
-        // if(aux<0){
-        ThreeBodyDecay(*heavyTrack, reactionPosition);
-        // }
+        if(8<=excitationRandom && excitationRandom <=16){ //Must two body decay
+            TwoBodyDecay(*heavyTrack, reactionPosition, excitationRandom); 
+        } else if(excitationRandom+fDecayQ>0) { //Can either three body or two body decay
+            if(G4UniformRand()<=0.5){
+                ThreeBodyDecay(*heavyTrack, reactionPosition, excitationRandom);
+            }
+            else{
+                TwoBodyDecay(*heavyTrack, reactionPosition, excitationRandom);
+            }
+        } else{
+            aParticleChange.AddSecondary(heavyTrack);
+        }
     }
 
-    void ReactionProcess::ThreeBodyDecay(const G4Track &aTrack, const G4ThreeVector &reactionPosition){
+    void ReactionProcess::ThreeBodyDecay(const G4Track &aTrack, const G4ThreeVector &reactionPosition, const G4double &excitation){
         
 
         G4ParticleDefinition *decayDefinition =
@@ -324,14 +333,13 @@ namespace MdmSim
 
         const G4double s = CM.M2();
         const G4double sqrtS = std::sqrt(s);
-        const G4double EkCM = fHeavyProductEx + fDecayQ;
-
+        const G4double EkCM = excitation + fDecayQ;
+        // G4cout << EkCM << G4endl;
         // This only works for two of the same decay particles ie 2n
 
         const G4double EMax = 4*EkCM*(lightOneMass/decayMass)/(1+4*lightOneMass/decayMass);
         const G4double ekDecayCM = EMax * G4UniformRand();
         // For single neutron emission channel VVV
-
         // const G4double ekDecayCM = EkCM*lightOneMass/(lightOneMass + decayMass);
 
         const G4double decayPCM = sqrt(2*ekDecayCM*decayMass); //Only care about tracking the heavy here
@@ -350,7 +358,40 @@ namespace MdmSim
         auto *decayTrack = new G4Track(decay, aTrack.GetGlobalTime(), reactionPosition);
         //Okay so decay is a particle actually being made, but for some reason it won't get added?
         aParticleChange.AddSecondary(decayTrack);
-        // G4cout << projectile4 << G4endl;
-        //Maybe??
+        
+    }
+
+    void ReactionProcess::TwoBodyDecay(const G4Track &aTrack, const G4ThreeVector &reactionPosition, const G4double &excitation){
+        G4ParticleDefinition *decayDefinition =
+            GetReactionParticleDefinition(fDecayHeavyZ, fDecayHeavyA, 0);
+        G4ParticleDefinition *lightDefinition =
+            GetReactionParticleDefinition(fDecayLightOneZ, fDecayLightOneA, 0);
+        const G4double decayMass = decayDefinition->GetPDGMass();
+        const G4double lightMass = lightDefinition->GetPDGMass();
+        
+        const G4LorentzVector projectile4 = aTrack.GetDynamicParticle()->Get4Momentum();
+        TLorentzVector projectile(projectile4.px(), projectile4.py(), projectile4.pz(),
+                                  projectile4.e());
+        TLorentzVector CM = projectile;
+        const G4double s = CM.M2();
+        const G4double sqrtS = std::sqrt(s);
+        const G4double EkCM = excitation + fDecayQ+8; //fDecay is for 2n atm and this will be for 1n
+        const G4double ekDecayCM = EkCM*lightMass/(lightMass + decayMass);
+
+        const G4double decayPCM = sqrt(2*ekDecayCM*decayMass); //Only care about tracking the heavy here
+        const G4double eDecayCM = sqrt(decayPCM*decayPCM  + decayMass*decayMass);
+        TVector3 decayMomentumCM(decayPCM, 0., 0.);
+        decayMomentumCM.SetTheta(std::acos(-1. + 2. * G4UniformRand()));
+        decayMomentumCM.SetPhi(G4UniformRand() * 2. * CLHEP::pi);
+        TLorentzVector decay4(decayMomentumCM, eDecayCM);
+        const TVector3 betaCm = CM.BoostVector();
+
+        decay4.Boost(betaCm);
+        auto *decay = new G4DynamicParticle(decayDefinition,
+                                            G4ThreeVector(decay4.Px(), decay4.Py(), decay4.Pz()));
+        decay->SetCharge(fDecayHeavyCharge * eplus);
+        auto *decayTrack = new G4Track(decay, aTrack.GetGlobalTime(), reactionPosition);
+        //Okay so decay is a particle actually being made, but for some reason it won't get added?
+        aParticleChange.AddSecondary(decayTrack);
     }
 }

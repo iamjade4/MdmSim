@@ -120,6 +120,7 @@ namespace MdmSim
         void SetProtonE(double d) { fProtonE = d; };
         void SetProtonTheta(double d) { fProtonTheta = d; };
         void SetProtonPhi(double d) { fProtonPhi = d; };
+        void SetExcitation(double d) { fExcitation = d; };
 
 
 
@@ -237,6 +238,7 @@ namespace MdmSim
         double fProtonE;
         double fProtonTheta;
         double fProtonPhi;
+        double fExcitation;
     };
 
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

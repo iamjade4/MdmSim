@@ -32,7 +32,7 @@
   "ReactionHeavyZ": 41,
   "ReactionHeavyA": 94,
   "ReactionHeavyCharge": 41,        // charge state, in units of e
-  "ReactionHeavyExMeV": 18,       // MeV excitation energy
+  "ReactionHeavyExMeV": 30,       // MeV excitation energy
 
 
   // Three-body decay params.

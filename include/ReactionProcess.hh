@@ -24,7 +24,8 @@ namespace MdmSim
 
     private:
         void TwoBody(const G4Track &aTrack, const G4ThreeVector &reactionPosition);
-        void ThreeBodyDecay(const G4Track &aTrack, const G4ThreeVector &reactionPosition);
+        void ThreeBodyDecay(const G4Track &aTrack, const G4ThreeVector &reactionPosition, const G4double &excitation);
+        void TwoBodyDecay(const G4Track &aTrack, const G4ThreeVector &reactionPosition, const G4double &excitation);
         G4double TargetPathLength(const G4Track &aTrack) const;
         G4double TargetDepthAlongTrack(const G4Track &aTrack) const;
 

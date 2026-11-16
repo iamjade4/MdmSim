@@ -157,6 +157,7 @@ namespace MdmSim
             fTreeAccurate->Branch("ProtonE", &fProtonE);
             fTreeAccurate->Branch("ProtonTheta", &fProtonTheta);
             fTreeAccurate->Branch("ProtonPhi", &fProtonPhi);
+            fTreeAccurate->Branch("Excitation", &fExcitation);
 
             fTreeExperiment->Branch("DaqTrigger", &fDaqTrigger, "DaqTrigger/O");
             fTreeExperiment->Branch("SiDeltaEHitEDep", &fSiDeltaEHitEDepExp);
